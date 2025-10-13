@@ -1,8 +1,3 @@
-// week5_task2_struct_save_load.c
-// Task 2: Save and load structured records from a file
-// Week 5 – Files & Modular Programming
-// TODO: Complete function implementations and file handling logic.
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,40 +5,79 @@
 #define MAX_NAME_LEN 50
 
 typedef struct {
-    char name[MAX_NAME_LEN];
-    int age;
-    float gpa;
+  char name[MAX_NAME_LEN];
+  int age;
+  float gpa;
 } Student;
 
-// Function prototypes
-void save_student(Student s, const char *filename);
-Student load_student(const char *filename);
+void save_students(Student* arr, int n, const char* filename);
+int load_students(Student* arr, int max_n, const char* filename);
 
 int main(void) {
-    Student s1;
-    strcpy(s1.name, "Alice");
-    s1.age = 21;
-    s1.gpa = 3.75f;
+  int n;
+  printf("Enter number of students: ");
+  if (scanf("%d", &n) != 1 || n < 1) {
+    printf("Invalid number.\n");
+    return 1;
+  }
+  Student* arr = malloc(n * sizeof(Student));
+  if (!arr) {
+    printf("Memory allocation failed.\n");
+    return 1;
+  }
+  for (int i = 0; i < n; i++) {
+    printf("Enter name age GPA for student %d: ", i + 1);
+    if (scanf("%49s %d %f", arr[i].name, &arr[i].age, &arr[i].gpa) != 3) {
+      printf("Invalid input.\n");
+      free(arr);
+      return 1;
+    }
+  }
 
-    const char *filename = "student.txt";
+  const char* filename = "src/struct.txt";
+  printf("Saving students to file...\n");
+  save_students(arr, n, filename);
 
-    // TODO: Call save_student() to save student data to file
-    // TODO: Call load_student() to read data back into a new struct
-    // TODO: Print loaded data to confirm correctness
+  printf("Loading students from file...\n");
+  Student* loaded = malloc(n * sizeof(Student));
+  if (!loaded) {
+    printf("Memory allocation failed.\n");
+    free(arr);
+    return 1;
+  }
+  int loaded_n = load_students(loaded, n, filename);
+  for (int i = 0; i < loaded_n; i++) {
+    printf("Loaded student: %s, %d, GPA %.2f\n", loaded[i].name, loaded[i].age,
+           loaded[i].gpa);
+  }
+  free(arr);
+  free(loaded);
+  return 0;
+}
 
+void save_students(Student* arr, int n, const char* filename) {
+  FILE* fp = fopen(filename, "w");
+  if (!fp) {
+    printf("Error: Could not open %s for writing.\n", filename);
+    return;
+  }
+  for (int i = 0; i < n; i++) {
+    fprintf(fp, "%s %d %.2f\n", arr[i].name, arr[i].age, arr[i].gpa);
+  }
+  fclose(fp);
+}
+
+int load_students(Student* arr, int max_n, const char* filename) {
+  FILE* fp = fopen(filename, "r");
+  if (!fp) {
+    printf("Error: Could not open %s for reading.\n", filename);
     return 0;
-}
-
-// TODO: Implement save_student()
-// Open file for writing, check errors, write fields, then close file
-void save_student(Student s, const char *filename) {
-    // ...
-}
-
-// TODO: Implement load_student()
-// Open file for reading, check errors, read fields, then close file
-Student load_student(const char *filename) {
-    Student s;
-    // ...
-    return s;
+  }
+  int i = 0;
+  while (i < max_n &&
+         fscanf(fp, "%49s %d %f", arr[i].name, &arr[i].age, &arr[i].gpa) == 3) {
+    i++;
+  }
+  fclose(fp);
+  return i;
 }

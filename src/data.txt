@@ -1,0 +1,3 @@
+Hello, I am Rudra
+I study at Riga Technical University
+I love programming in C
